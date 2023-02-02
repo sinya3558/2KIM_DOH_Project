@@ -1,26 +1,50 @@
 #!/usr/bin/env python3
 import os
-import argparse
+import sys
 import subprocess
-from javascript import require
 
-parser = argparse.ArgumentParser(description = 'make it as executable file')
-parser.add_argument('action')
+if __name__ == "__main__":
+    action = sys.argv[1]
+    if (action == 'install'):
+        subprocess.run(["npm init -y"], shell = True)
+        subprocess.run(["npm install commander figlet"], shell = True)
+        subprocess.run(["npm install @types/node typescript --save-dev"], shell = True)
 
-args = parser.parse_args()
-action = args.action
+        subprocess.run(["pip install javascript"], shell = True)
 
-if (action == 'install'):
-    subprocess.run(["npm init -y"], shell = True)
-    subprocess.run(["npm install commander figlet"], shell = True)
-    subprocess.run(["npm install @types/node typescript --save-dev"], shell = True)
+    elif(action == 'build'):
+        subprocess.run(["npm run build"], shell = True)
 
-test = require("./index.js")
-result = test.myFunction(2)
-print(result)
-#if (url)
-#    output = busfactor(input)
-#
-#if (build)
-#    subprocess.run[
+    elif(action == 'test'):
+        print('testing')
+
+    #in case of URL
+    else:
+        url_file_name = sys.argv[1]
+        from javascript import require
+        url_file = open(url_file_name, 'r')
+        trust_dict = {}
+
+        while True:
+            url = url_file.readline()
+
+            if not url:
+                print("No More URL")
+                break
+
+            js_file = require("./index.js")
+            bf_subscore = js_file.getBusFactor(url)
+            li_subscore = js_file.getLicense(url)
+            cor_subscore = js_file.getCorrectness(url)
+            ramp_subscore = js_file.getRampUp(url)
+            resp_subscore = js_file.getResponsive(url)
+
+            net_score = (bf_subscore * 0.40) + (li_subscore * 0.15) + (cor_subscore * 0.15) + (ramp_subscore * 0.15) + (resp_subscore * 0.15)
+
+            trust_dict[url] = net_score
+
+        print(trust_dict)
+        sortedTrust_dict = dict(sorted(trust_dict.items(), key=lambda item: item[1], reverse=True))
+        Trustworthy_list = sortedTrust_dict.keys()
+        print(Trustworthy_list)
 
