@@ -1,17 +1,32 @@
-const { Command } = require("commander");
-const figlet = require("figlet");
+function getBusFactor(url) {
+  url = url;
+  sub_score = Math.floor(Math.random() * 10);
+  return sub_score;
+}
 
-const program = new Command();
+function getRampUp(url) {
+  url = url;
+  sub_score = Math.floor(Math.random() * 10);
+  return sub_score;
+}
 
-console.log(figlet.textSync("2KIM & DOH"));
+function getCorrectness(url) {
+  url = url;
+  sub_score = Math.floor(Math.random() * 10);
+  return sub_score;
+}
 
-program
-    .version("1.0.0")
-    .description("2KIM & DOH CLI Project1")
-    .option("./run install", "Install all the dependencies")
-    .option("./run <sample-url-file.txt directory>", "Read URL txt file")
-    .option("./run test", "Run Tests")
-    .parse(process.argv);
+function getLicense(url) {
+  url = url;
+  sub_score = Math.floor(Math.random() * 10);
+  return sub_score;
+}
 
-const options = program.opts();
+function getResponsive(url) {
+  url = url;
+  sub_score = Math.floor(Math.random() * 10);
+  return sub_score;
+}
+
+module.exports = { getBusFactor, getLicense, getCorrectness, getResponsive, getRampUp };
 
