@@ -1,14 +1,28 @@
 "use strict";
-const { Command } = require("commander");
-const figlet = require("figlet");
-const program = new Command();
-console.log(figlet.textSync("2KIM & DOH"));
-program
-    .version("1.0.0")
-    .description("2KIM & DOH CLI Project1")
-    .option("./run install", "Install all the dependencies")
-    .option("./run <sample-url-file.txt directory>", "Read URL txt file")
-    .option("./run test", "Run Tests")
-    .parse(process.argv);
-const options = program.opts();
+function getBusFactor(url) {
+    url = url;
+    const sub_score = Math.floor(Math.random() * 10);
+    return sub_score;
+}
+function getRampUp(url) {
+    url = url;
+    sub_score = Math.floor(Math.random() * 10);
+    return sub_score;
+}
+function getCorrectness(url) {
+    url = url;
+    sub_score = Math.floor(Math.random() * 10);
+    return sub_score;
+}
+function getLicense(url) {
+    url = url;
+    sub_score = Math.floor(Math.random() * 10);
+    return sub_score;
+}
+function getResponsive(url) {
+    url = url;
+    sub_score = Math.floor(Math.random() * 10);
+    return sub_score;
+}
+module.exports = { getBusFactor, getLicense, getCorrectness, getResponsive, getRampUp };
 //# sourceMappingURL=index.js.map
