@@ -12,6 +12,8 @@ if __name__ == "__main__":
         subprocess.run(["npm install @types/node typescript --save-dev"], shell = True)
         subprocess.run(["npm install node-fetch"], shell = True)
         subprocess.run(["npm install --save-dev @types/node-fetch@2.x"], shell = True)
+        subprocess.run(["npm install axios"], shell = True)
+        subprocess.run(["npm i --save-dev @types/node"], shell = True)
 
         subprocess.run(["pip install javascript"], shell = True)
 
