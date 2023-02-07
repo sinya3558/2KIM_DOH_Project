@@ -9,3 +9,4 @@ console.log(index)
 var cnt = 3
 cnt -= 1
 console.log(cnt)
+const data

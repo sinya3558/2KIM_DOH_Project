@@ -3,6 +3,33 @@ import os
 import sys
 import subprocess
 import javascript
+import json
+
+def getCorrectness(json_file, testScore):
+    each_score = []
+    f = open(json_file)
+    data = json.load(f)
+    data_checks = data['checks']
+    for test in testScore:
+        index = find(data_checks, "name", test)
+        if index == -1:
+            getScore = 0
+            each_score.append(getScore)
+        else:
+            if ("score" in data_checks[index]):
+                getScore = data_checks[index]["score"]
+                each_score.append(getScore)
+            else:
+                getScore = 0
+                each_score.append(getScore)
+    sub_score = sum(each_score) / len(testScore)
+    return sub_score
+
+def find(lst, key, value):
+    for i, dic in enumerate(lst):
+        if dic[key] == value:
+            return i
+    return -1
 
 if __name__ == "__main__":
     action = sys.argv[1]
@@ -39,12 +66,13 @@ if __name__ == "__main__":
 
             js_file = require("./api.js")
             json_file = js_file.getScoreCard(url) #generate the json file for scorecard
+            testScore = ["Vulnerabilities", "CII-Best-Practices", "CI-Test"]
+
             bf_subscore = js_file.getBusFactor()
             li_subscore = js_file.getLicense()
-            cor_subscore = js_file.getCorrectness()
+            cor_subscore = getCorrectness(json_file, testScore)
             ramp_subscore = js_file.getRampUp()
             resp_subscore = js_file.getResponsive()
-
 
             net_score = (bf_subscore * 0.40) + (li_subscore * 0.15) + (cor_subscore * 0.15) + (ramp_subscore * 0.15) + (resp_subscore * 0.15)
 
