@@ -8,7 +8,8 @@ if __name__ == "__main__":
     action = sys.argv[1]
     if (action == 'install'):
         subprocess.run(["npm init -y"], shell = True)
-        subprocess.run(["npm install commander figlet"], shell = True)
+        subprocess.run(["npm install -g typeScript"], shell = True)
+        subprocess.run(["npm install commander"], shell = True)
         subprocess.run(["npm install @types/node typescript --save-dev"], shell = True)
         subprocess.run(["npm install node-fetch"], shell = True)
         subprocess.run(["npm install --save-dev @types/node-fetch@2.x"], shell = True)
@@ -34,7 +35,6 @@ if __name__ == "__main__":
             url = url_file.readline()
 
             if not url:
-                print("No More URL")
                 break
 
             js_file = require("./api.js")
@@ -45,12 +45,6 @@ if __name__ == "__main__":
             ramp_subscore = js_file.getRampUp()
             resp_subscore = js_file.getResponsive()
 
-
-            #bf_subscore = js_file.getBusFactor(url)
-            #li_subscore = js_file.getLicense(url)
-            #cor_subscore = js_file.getCorrectness(url)
-            #ramp_subscore = js_file.getRampUp(url)
-            #resp_subscore = js_file.getResponsive(url)
 
             net_score = (bf_subscore * 0.40) + (li_subscore * 0.15) + (cor_subscore * 0.15) + (ramp_subscore * 0.15) + (resp_subscore * 0.15)
 
