@@ -37,7 +37,6 @@ if __name__ == "__main__":
         subprocess.run(["npm init -y"], shell = True)
         subprocess.run(["npm install -g typeScript"], shell = True)
         subprocess.run(["npm install commander"], shell = True)
-        subprocess.run(["npm install @types/node typescript --save-dev"], shell = True)
         subprocess.run(["npm install node-fetch"], shell = True)
         subprocess.run(["npm install --save-dev @types/node-fetch@2.x"], shell = True)
         subprocess.run(["npm install axios"], shell = True)
