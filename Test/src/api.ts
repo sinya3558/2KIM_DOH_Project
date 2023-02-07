@@ -1,5 +1,6 @@
 const axios = require('axios')
 const fs = require('fs')
+//import { Octokit } from "octokit";
 
 async function getScoreCard(url) {
     var api_url = new String("https://api.securityscorecards.dev/projects/");
@@ -27,6 +28,12 @@ async function getScoreCard(url) {
         });
     return jsonfile_name
 }
+
+//const octokit = net Octokit({
+//    auth: ,
+//});
+//await octokit.request("Get /octocat", {});
+
 //console.log(getScoreCard("https://github.com/cloudinary/cloudinary_npm"));
 //console.log(getScoreCard("https://github.com/lodash/lodash"));
 //console.log(getScoreCard("https://github.com/nullivex/nodist"));
@@ -52,6 +59,3 @@ function getResponsive() {
 }
 
 module.exports = { getScoreCard, getBusFactor, getLicense,  getRampUp, getResponsive };
-// need to implement how to get into the github repo when the url is 'npm' (need some think)
-// 'npm' URLs cause error with axios.
-// need to implement how to read json file and use them to calculate each sub-score (not too hard)
