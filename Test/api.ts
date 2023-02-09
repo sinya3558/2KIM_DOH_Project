@@ -28,100 +28,64 @@ async function getScoreCard(url: string) {
     return jsonfile_name
 }
 
-//const octokit = net Octokit({
-//    auth: ,
-//});
-//await octokit.request("Get /octocat", {});
 
-//console.log(getScoreCard("https://github.com/cloudinary/cloudinary_npm"));
-//console.log(getScoreCard("https://github.com/lodash/lodash"));
-//console.log(getScoreCard("https://github.com/nullivex/nodist"));
-//const { graphql } = require("@octokit/graphql");
-//import type { GraphQlQueryResponseData } from "@octokit/graphql";
-//const graphqlWithAuth = graphql.defaults({
-//    headers: {
-//        authorization: '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',
-//    },
-//});
-//
-////export {}
-//
-//const { lastIssues } = graphql({
-//  query: `query lastIssues($owner: String!, $repo: String!, $num: Int = 3) {
-//    repository(owner:$owner, name:$repo) {
-//      issues(last:$num) {
-//        edges {
-//          node {
-//            title
-//          }
-//        }
-//      }
-//    }
-//  }`,
-//  owner: "octokit",
-//  repo: "graphql.js",
-//  headers: {
-//    authorization: `token secret123`,
-//  },
-//});
-
-//console.log(lastIssues);
-
-//const { repository } = async () => Promise<void> {
-//    await graphqlWithAuth (
-//        `{
-//            repository(owner: "octokit", name: "graphql.js") {
-//                issues(last: 3) {
-//                    edges {
-//                        node {
-//                            title
-//                        }
-//                    }
-//                }
-//            }
-//        }`
-//    ),
-//};
-const { Octokit } = require("@octokit/core");
-
-export {}
-
-async function myfunction(url: string)  {
-    const octokit = await new Octokit({
-        auth: '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'
+async function getLicense() {
+    const { Octokit } = require("octokit");
+    const octokit = new Octokit({
+        auth: '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'
     });
-    //const response = await octokit.request('GET /repos/{owner}/{repo}/license', {
-    //    owner: 'danieldoh',
-    //    repo: '2KIM_DOH_Project'
-
-    //})
-    const response = await octokit.request('GET /licenses', {})
-    console.log(response);
-    console.log(url);
+    //octokit.paginate(
+    //    "GET /repos/{owner}/{repo}/issues",
+    //    { owner: "octokit", repo: "rest.js" },
+    //    (response, done) => {
+    //        if (response.data.find((issue) => issue.body.includes("something"))) {
+    //        done();
+    //        }
+    //        return response.data;
+    //    }
+    //);
+    const response = await octokit.request('GET /repos/{owner}/{repo}/issues', {
+        owner: "octokit",
+        repo: "rest.js"
+    });
+    return response.data.length
 }
 
-myfunction.length;
 
-
-
-function getBusFactor() {
-    const bf_subscore = 5
-    return bf_subscore
+async function getBusFactor() {
+    const { Octokit } = require("octokit");
+    const octokit = new Octokit({
+        auth: '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'
+    });
+    const response = await octokit.request('GET /repos/{owner}/{repo}/issues', {
+        owner: "octokit",
+        repo: "rest.js"
+    });
+    return response.data.length
 }
 
-function getLicense() {
-    const li_subscore = 3
-    return li_subscore
+async function getRampUp() {
+    const { Octokit } = require("octokit");
+    const octokit = new Octokit({
+        auth: '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'
+    });
+    const response = await octokit.request('GET /repos/{owner}/{repo}/issues', {
+        owner: "octokit",
+        repo: "rest.js"
+    });
+    return response.data.length
 }
 
-function getRampUp() {
-    const ramp_subscore = 6
-    return ramp_subscore
+async function getResponsive() {
+    const { Octokit } = require("octokit");
+    const octokit = new Octokit({
+        auth: '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'
+    });
+    const response = await octokit.request('GET /repos/{owner}/{repo}/issues', {
+        owner: "octokit",
+        repo: "rest.js"
+    });
+    return response.data.length
 }
 
-function getResponsive() {
-    const resp_subscore = 4
-    return resp_subscore
-}
-
-module.exports = { getScoreCard, getBusFactor, getLicense,  getRampUp, getResponsive, myfunction };
+module.exports = { getScoreCard, getBusFactor, getLicense,  getRampUp, getResponsive};

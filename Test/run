@@ -67,7 +67,6 @@ if __name__ == "__main__":
 
             js_file = require("./api.js")
             json_file = js_file.getScoreCard(url) #generate the json file for scorecard
-            myfunction = js_file.myfunction(url)
             testScore = ["Vulnerabilities", "CII-Best-Practices", "CI-Test"]
 
             bf_subscore = js_file.getBusFactor()
@@ -76,7 +75,7 @@ if __name__ == "__main__":
             ramp_subscore = js_file.getRampUp()
             resp_subscore = js_file.getResponsive()
 
-            net_score = (bf_subscore * 0.40) + (li_subscore * 0.15) + (cor_subscore * 0.15) + (ramp_subscore * 0.15) + (resp_subscore * 0.15)
+            net_score = (bf_subscore * 0.40) + (5 * 0.15) + (cor_subscore * 0.15) + (ramp_subscore * 0.15) + (resp_subscore * 0.15)
 
             trust_dict[url] = net_score
 
