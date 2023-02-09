@@ -41,7 +41,9 @@ if __name__ == "__main__":
         subprocess.run(["npm install --save-dev @types/node-fetch@2.x"], shell = True)
         subprocess.run(["npm install axios"], shell = True)
         subprocess.run(["npm i --save-dev @types/node"], shell = True)
-
+        #subprocess.run(["npm install --save-dev @octokit/graphql-schema @graphql-codegen/cli"], shell = True)
+        #npm install @octokit/auth-app
+        #npm install @octokit/graphql
         subprocess.run(["pip install javascript"], shell = True)
 
     elif(action == 'build'):
@@ -65,6 +67,7 @@ if __name__ == "__main__":
 
             js_file = require("./api.js")
             json_file = js_file.getScoreCard(url) #generate the json file for scorecard
+            myfunction = js_file.myfunction(url)
             testScore = ["Vulnerabilities", "CII-Best-Practices", "CI-Test"]
 
             bf_subscore = js_file.getBusFactor()
