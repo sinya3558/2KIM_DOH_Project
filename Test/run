@@ -32,6 +32,9 @@ def find(lst, key, value):
     return -1
 
 if __name__ == "__main__":
+    token_file = open("../../token.txt", 'r')
+    token = token_file.readline()
+    print(token)
     action = sys.argv[1]
     if (action == 'install'):
         subprocess.run(["npm init -y"], shell = True)
@@ -69,11 +72,11 @@ if __name__ == "__main__":
             json_file = js_file.getScoreCard(url) #generate the json file for scorecard
             testScore = ["Vulnerabilities", "CII-Best-Practices", "CI-Test"]
 
-            bf_subscore = js_file.getBusFactor()
-            li_subscore = js_file.getLicense()
+            bf_subscore = js_file.getBusFactor(token,url)
+            li_subscore = js_file.getLicense(token, url)
             cor_subscore = getCorrectness(json_file, testScore)
-            ramp_subscore = js_file.getRampUp()
-            resp_subscore = js_file.getResponsive()
+            ramp_subscore = js_file.getRampUp(token, url)
+            resp_subscore = js_file.getResponsive(token, url)
 
             net_score = (bf_subscore * 0.40) + (5 * 0.15) + (cor_subscore * 0.15) + (ramp_subscore * 0.15) + (resp_subscore * 0.15)
 

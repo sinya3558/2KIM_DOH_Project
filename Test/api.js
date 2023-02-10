@@ -70,19 +70,22 @@ function getScoreCard(url) {
         });
     });
 }
-function getLicense() {
+function getLicense(token, url) {
     return __awaiter(this, void 0, void 0, function () {
-        var Octokit, octokit, response;
+        var Octokit, octokit, url_len, sliced_url, repo_info, response;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     Octokit = require("octokit").Octokit;
                     octokit = new Octokit({
-                        auth: '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'
+                        auth: token
                     });
+                    url_len = url.length;
+                    sliced_url = url.slice(19, url_len);
+                    repo_info = sliced_url.split("/", 2);
                     return [4 /*yield*/, octokit.request('GET /repos/{owner}/{repo}/issues', {
-                            owner: "octokit",
-                            repo: "rest.js"
+                            owner: repo_info[0],
+                            repo: repo_info[1]
                         })];
                 case 1:
                     response = _a.sent();
@@ -91,19 +94,24 @@ function getLicense() {
         });
     });
 }
-function getBusFactor() {
+function getBusFactor(token, url) {
     return __awaiter(this, void 0, void 0, function () {
-        var Octokit, octokit, response;
+        var Octokit, octokit, url_len, sliced_url, repo_info, response;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     Octokit = require("octokit").Octokit;
                     octokit = new Octokit({
-                        auth: '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'
+                        auth: token
                     });
+                    url_len = url.length;
+                    sliced_url = url.slice(19, url_len);
+                    repo_info = sliced_url.split("/", 2);
+                    console.log(repo_info[0]);
+                    console.log(repo_info[1]);
                     return [4 /*yield*/, octokit.request('GET /repos/{owner}/{repo}/issues', {
-                            owner: "octokit",
-                            repo: "rest.js"
+                            owner: repo_info[0],
+                            repo: repo_info[1]
                         })];
                 case 1:
                     response = _a.sent();
@@ -112,19 +120,22 @@ function getBusFactor() {
         });
     });
 }
-function getRampUp() {
+function getRampUp(token, url) {
     return __awaiter(this, void 0, void 0, function () {
-        var Octokit, octokit, response;
+        var Octokit, octokit, url_len, sliced_url, repo_info, response;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     Octokit = require("octokit").Octokit;
                     octokit = new Octokit({
-                        auth: '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'
+                        auth: token
                     });
+                    url_len = url.length;
+                    sliced_url = url.slice(19, url_len);
+                    repo_info = sliced_url.split("/", 2);
                     return [4 /*yield*/, octokit.request('GET /repos/{owner}/{repo}/issues', {
-                            owner: "octokit",
-                            repo: "rest.js"
+                            owner: repo_info[0],
+                            repo: repo_info[1]
                         })];
                 case 1:
                     response = _a.sent();
@@ -133,19 +144,22 @@ function getRampUp() {
         });
     });
 }
-function getResponsive() {
+function getResponsive(token, url) {
     return __awaiter(this, void 0, void 0, function () {
-        var Octokit, octokit, response;
+        var Octokit, octokit, url_len, sliced_url, repo_info, response;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     Octokit = require("octokit").Octokit;
                     octokit = new Octokit({
-                        auth: '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'
+                        auth: token
                     });
+                    url_len = url.length;
+                    sliced_url = url.slice(19, url_len);
+                    repo_info = sliced_url.split("/", 2);
                     return [4 /*yield*/, octokit.request('GET /repos/{owner}/{repo}/issues', {
-                            owner: "octokit",
-                            repo: "rest.js"
+                            owner: repo_info[0],
+                            repo: repo_info[1]
                         })];
                 case 1:
                     response = _a.sent();
