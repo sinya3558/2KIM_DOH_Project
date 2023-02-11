@@ -23,82 +23,139 @@ async function getScoreCard(url: string) {
             })
         })
         .catch(function (error: any) {
-            console.error(error);
+            jsonfile_name = '404';
         });
     return jsonfile_name
 }
 
-async function getLicense(token, url) {
+async function getLicense(token, url, action_info) {
     const { Octokit } = require("octokit");
     const octokit = new Octokit({
         auth: token
     });
-    //octokit.paginate(
-    //    "GET /repos/{owner}/{repo}/issues",
-    //    { owner: "octokit", repo: "rest.js" },
-    //    (response, done) => {
-    //        if (response.data.find((issue) => issue.body.includes("something"))) {
-    //        done();
-    //        }
-    //        return response.data;
-    //    }
-    //);
-    var url_len = url.length;
+    var url_trim = url.trim();
+    var url_len = url_trim.length;
     var sliced_url = url.slice(19, url_len);
     var repo_info = sliced_url.split("/",2);
-    const response = await octokit.request('GET /repos/{owner}/{repo}/issues', {
+    const response = await octokit.request('GET /repos/{owner}/{repo}/{action}', {
         owner: repo_info[0],
-        repo: repo_info[1]
+        repo: repo_info[1],
+        action: action_info
+    });
+    return response.data.length
+}
+
+//async function getBusFactor(token) {
+//    const { graphql } = require("@octokit/graphql");
+//    const graphqlWithAuth = graphql.defaults({
+//        headers: {
+//            auth: token,
+//        },
+//    });
+//    //var url_trim = url.trim();
+//    //var url_len = url_trim.length;
+//    //var sliced_url = url.slice(19, url_len);
+//    //var repo_info = sliced_url.split("/",2);
+//    const { repository } = await graphqlWithAuth (`
+//        {
+//            repository(owner: "octokit", name: "graphql.js") {
+//                issues(last: 3) {
+//                    edges {
+//                        node {
+//                            title
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    `);
+//}
+async function getBusFactor(token, url, action_info) {
+    const { Octokit } = require("octokit");
+    const octokit = new Octokit({
+        auth: token
+    });
+    var url_trim = url.trim();
+    var url_len = url_trim.length;
+    var sliced_url = url.slice(19, url_len);
+    var repo_info = sliced_url.split("/",2);
+    const response = await octokit.request('GET /repos/{owner}/{repo}/{action}', {
+        owner: repo_info[0],
+        repo: repo_info[1],
+        action: action_info
     });
     return response.data.length
 }
 
 
-async function getBusFactor(token, url) {
+async function getReadme(token, url, action_info) {
     const { Octokit } = require("octokit");
     const octokit = new Octokit({
         auth: token
     });
-    var url_len = url.length;
+    var url_trim = url.trim();
+    var url_len = url_trim.length;
     var sliced_url = url.slice(19, url_len);
     var repo_info = sliced_url.split("/",2);
-    console.log(repo_info[0]);
-    console.log(repo_info[1]);
-    const response = await octokit.request('GET /repos/{owner}/{repo}/issues', {
-        owner: repo_info[0],
-        repo: repo_info[1]
-    });
-    return response.data.length
+    var json_file = './readme.json';
+    try {
+        const readme = await octokit.request('GET /repos/{owner}/{repo}/{action}', {
+            owner: repo_info[0],
+            repo: repo_info[1],
+            action: action_info
+        });
+        const jsonString = JSON.stringify(readme.data, null, 2)
+        fs.writeFileSync(json_file, jsonString, {
+            flag: 'w'
+        })
+    } catch(error) {
+        json_file = "404";
+    }
+    return json_file
 }
 
-async function getRampUp(token, url) {
+async function getLang(token, url, action_info) {
     const { Octokit } = require("octokit");
     const octokit = new Octokit({
         auth: token
     });
-    var url_len = url.length;
+    var url_trim = url.trim();
+    var url_len = url_trim.length;
     var sliced_url = url.slice(19, url_len);
     var repo_info = sliced_url.split("/",2);
-    const response = await octokit.request('GET /repos/{owner}/{repo}/issues', {
-        owner: repo_info[0],
-        repo: repo_info[1]
-    });
-    return response.data.length
+    var json_file = './language.json';
+    try {
+        const lang = await octokit.request('GET /repos/{owner}/{repo}/{action}', {
+            owner: repo_info[0],
+            repo: repo_info[1],
+            action: action_info
+        });
+        const jsonString = JSON.stringify(lang.data, null, 2)
+        fs.writeFileSync(json_file, jsonString, {
+            flag: 'w'
+        })
+    } catch(error) {
+        json_file = "404";
+    }
+
+    return json_file
 }
 
-async function getResponsive(token, url) {
+async function getResponsive(token, url, action_info) {
     const { Octokit } = require("octokit");
     const octokit = new Octokit({
         auth: token
     });
-    var url_len = url.length;
+    var url_trim = url.trim();
+    var url_len = url_trim.length;
     var sliced_url = url.slice(19, url_len);
     var repo_info = sliced_url.split("/",2);
-    const response = await octokit.request('GET /repos/{owner}/{repo}/issues', {
+    const response = await octokit.request('GET /repos/{owner}/{repo}/{action}', {
         owner: repo_info[0],
-        repo: repo_info[1]
+        repo: repo_info[1],
+        action: action_info
     });
     return response.data.length
 }
 
-module.exports = { getScoreCard, getBusFactor, getLicense,  getRampUp, getResponsive};
+module.exports = { getScoreCard, getBusFactor, getLicense,  getReadme, getLang, getResponsive };

@@ -5,6 +5,12 @@ import subprocess
 import javascript
 import json
 
+def percentage(dict):
+    value_sum = sum(dict.values())
+    for lang_, lang_size in dict.items():
+        dict[lang_] = 100 * float(lang_size) / float(value_sum)
+    return dict
+
 def getCorrectness(json_file, testScore):
     each_score = []
     f = open(json_file)
@@ -31,10 +37,34 @@ def find(lst, key, value):
             return i
     return -1
 
+def getJsonData(readme_json, action):
+    f = open(readme_json)
+    data = json.load(f)
+    if action != 'None':
+        get_data = data[action]
+    else:
+        get_data = data
+
+    return get_data
+
+def convertReadme(readme_size):
+    if (readme_size < 1000):
+        readme_subscore = 1
+    elif ((readme_size >= 1000) and (readme_size <= 3000)):
+        readme_subscore = 2
+    elif ((readme_size >= 3000) and (readme_size < 7000)):
+        readme_subscore = 4
+    elif ((readme_size >= 7000) and (readme_size < 10000)):
+        readme_subscore = 7
+    else:
+        readme_subscore = 10
+    return readme_subscore
+
 if __name__ == "__main__":
     token_file = open("../../token.txt", 'r')
     token = token_file.readline()
-    print(token)
+    #token_gql = 'Bearer ' + token
+    #print(token_gql)
     action = sys.argv[1]
     if (action == 'install'):
         subprocess.run(["npm init -y"], shell = True)
@@ -69,14 +99,64 @@ if __name__ == "__main__":
                 break
 
             js_file = require("./api.js")
-            json_file = js_file.getScoreCard(url) #generate the json file for scorecard
-            testScore = ["Vulnerabilities", "CII-Best-Practices", "CI-Test"]
 
-            bf_subscore = js_file.getBusFactor(token,url)
-            li_subscore = js_file.getLicense(token, url)
-            cor_subscore = getCorrectness(json_file, testScore)
-            ramp_subscore = js_file.getRampUp(token, url)
-            resp_subscore = js_file.getResponsive(token, url)
+            action_info = ['issues', 'languages', 'readme', "contributors"]
+
+            # calculate the bus factor (contributors)
+            bf_subscore = js_file.getBusFactor(token, url, action_info[3])
+            print("contributors", bf_subscore)
+            bf_subscore = 5
+
+            # calculate the license score
+            li_subscore = js_file.getLicense(token, url, action_info[0])
+
+            # calculate the correctness score (using three tests)
+            # generate the json file for scorecard
+            json_file = js_file.getScoreCard(url)
+            testScore = ["Vulnerabilities", "CII-Best-Practices", "CI-Test"]
+            if (json_file != '404'):
+                cor_subscore = getCorrectness(json_file, testScore)
+            else:
+                cor_subscore = 0
+
+            #==================================================================
+            # calculate the ramp up time (readme and language)
+            # 1) getReadme: make a json file that contains README data
+            # 2) getLang: get used programming languages in the repository
+            # 3) common_language: a dictionary of most used programming language in 2022
+
+            readme_json = js_file.getReadme(token, url, action_info[2])
+            if (readme_json != '404'):
+                readme_size = getJsonData(readme_json, 'size')
+            else:
+                readme_size = 0
+
+            readme_subscore = convertReadme(readme_size)
+
+            lang_json = js_file.getLang(token, url, action_info[1])
+            if (lang_json != '404'):
+                lang_type = getJsonData(lang_json, 'None')
+            else:
+                lang_type = 0
+
+            common_language = {"JavaScript": 10, "HTML": 9, "CSS": 9,
+                               "SQL": 8, "Python": 8, "Typescript": 7.5,
+                               "Java": 7.5, "Bash": 7, "Shell": 6.5, "C#": 6,
+                               "C++": 5.5, "PHP": 5, "C": 4, "PowerShell": 3, "Go": 2.5, "Rust": 1.5}
+            lang_subscore = 0
+
+            lang_type_percent = percentage(lang_type)
+            for lang_, lang_size in lang_type_percent.items():
+                if lang_ in common_language:
+                    lang_subscore += common_language[lang_] * (lang_size / 100)
+
+            ramp_subscore = (lang_subscore + readme_subscore) / 2
+            print('ramp_subscore', ramp_subscore)
+            #==================================================================
+
+            # calculate the responsiveness
+            resp_subscore = js_file.getResponsive(token, url, action_info[0])
+
 
             net_score = (bf_subscore * 0.40) + (5 * 0.15) + (cor_subscore * 0.15) + (ramp_subscore * 0.15) + (resp_subscore * 0.15)
 
