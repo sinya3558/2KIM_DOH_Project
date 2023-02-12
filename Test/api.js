@@ -70,57 +70,32 @@ function getScoreCard(url) {
         });
     });
 }
-function getLicense(token, url, action_info) {
+function getLicense(token, url) {
     return __awaiter(this, void 0, void 0, function () {
-        var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, response;
+        var graphql, url_trim, url_len, sliced_url, repo_info, repository;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    Octokit = require("octokit").Octokit;
-                    octokit = new Octokit({
-                        auth: token
-                    });
+                    graphql = require("@octokit/graphql").graphql;
                     url_trim = url.trim();
                     url_len = url_trim.length;
                     sliced_url = url.slice(19, url_len);
                     repo_info = sliced_url.split("/", 2);
-                    return [4 /*yield*/, octokit.request('GET /repos/{owner}/{repo}/{action}', {
+                    return [4 /*yield*/, graphql({
+                            query: "query repository_details($owner: String!, $repo: String!) {\n            repository(owner:$owner, name:$repo) {\n                licenseInfo {\n                    name\n                }\n            }\n        }",
                             owner: repo_info[0],
                             repo: repo_info[1],
-                            action: action_info
+                            headers: {
+                                'Authorization': 'bearer ' + token
+                            }
                         })];
                 case 1:
-                    response = _a.sent();
-                    return [2 /*return*/, response.data.length];
+                    repository = (_a.sent()).repository;
+                    return [2 /*return*/, repository];
             }
         });
     });
 }
-//async function getBusFactor(token) {
-//    const { graphql } = require("@octokit/graphql");
-//    const graphqlWithAuth = graphql.defaults({
-//        headers: {
-//            auth: token,
-//        },
-//    });
-//    //var url_trim = url.trim();
-//    //var url_len = url_trim.length;
-//    //var sliced_url = url.slice(19, url_len);
-//    //var repo_info = sliced_url.split("/",2);
-//    const { repository } = await graphqlWithAuth (`
-//        {
-//            repository(owner: "octokit", name: "graphql.js") {
-//                issues(last: 3) {
-//                    edges {
-//                        node {
-//                            title
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    `);
-//}
 function getContributor(token, url, action_info) {
     return __awaiter(this, void 0, void 0, function () {
         var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, json_file, contribute, jsonString, error_1;
@@ -238,30 +213,20 @@ function getLang(token, url, action_info) {
         });
     });
 }
-function getResponsive(token, url, action_info) {
-    return __awaiter(this, void 0, void 0, function () {
-        var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, response;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    Octokit = require("octokit").Octokit;
-                    octokit = new Octokit({
-                        auth: token
-                    });
-                    url_trim = url.trim();
-                    url_len = url_trim.length;
-                    sliced_url = url.slice(19, url_len);
-                    repo_info = sliced_url.split("/", 2);
-                    return [4 /*yield*/, octokit.request('GET /repos/{owner}/{repo}/{action}', {
-                            owner: repo_info[0],
-                            repo: repo_info[1],
-                            action: action_info
-                        })];
-                case 1:
-                    response = _a.sent();
-                    return [2 /*return*/, response.data.length];
-            }
-        });
-    });
-}
-module.exports = { getScoreCard: getScoreCard, getContributor: getContributor, getLicense: getLicense, getReadme: getReadme, getLang: getLang, getResponsive: getResponsive };
+//async function getResponsive(token, url, action_info) {
+//    const { Octokit } = require("octokit");
+//    const octokit = new Octokit({
+//        auth: token
+//    });
+//    var url_trim = url.trim();
+//    var url_len = url_trim.length;
+//    var sliced_url = url.slice(19, url_len);
+//    var repo_info = sliced_url.split("/",2);
+//    const response = await octokit.request('GET /repos/{owner}/{repo}/{action}', {
+//        owner: repo_info[0],
+//        repo: repo_info[1],
+//        action: action_info
+//    });
+//    return response.data.length
+//}
+module.exports = { getScoreCard: getScoreCard, getContributor: getContributor, getLicense: getLicense, getReadme: getReadme, getLang: getLang };

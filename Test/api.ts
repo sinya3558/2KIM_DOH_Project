@@ -28,51 +28,31 @@ async function getScoreCard(url: string) {
     return jsonfile_name
 }
 
-async function getLicense(token, url, action_info) {
-    const { Octokit } = require("octokit");
-    const octokit = new Octokit({
-        auth: token
-    });
+async function getLicense(token, url) {
+    const { graphql } = require("@octokit/graphql");
     var url_trim = url.trim();
     var url_len = url_trim.length;
     var sliced_url = url.slice(19, url_len);
     var repo_info = sliced_url.split("/",2);
-    const response = await octokit.request('GET /repos/{owner}/{repo}/{action}', {
+
+    const { repository } = await graphql ({
+        query: `query repository_details($owner: String!, $repo: String!) {
+            repository(owner:$owner, name:$repo) {
+                licenseInfo {
+                    name
+                }
+            }
+        }`,
         owner: repo_info[0],
         repo: repo_info[1],
-        action: action_info
+        headers: {
+            'Authorization': 'bearer ' + token,
+        },
     });
-    return response.data.length
+    return repository
 }
 
-//async function getBusFactor(token) {
-//    const { graphql } = require("@octokit/graphql");
-//    const graphqlWithAuth = graphql.defaults({
-//        headers: {
-//            auth: token,
-//        },
-//    });
-//    //var url_trim = url.trim();
-//    //var url_len = url_trim.length;
-//    //var sliced_url = url.slice(19, url_len);
-//    //var repo_info = sliced_url.split("/",2);
-//    const { repository } = await graphqlWithAuth (`
-//        {
-//            repository(owner: "octokit", name: "graphql.js") {
-//                issues(last: 3) {
-//                    edges {
-//                        node {
-//                            title
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    `);
-//}
-
-async function getContributor(token, url, action_info) {
-    const { Octokit } = require("octokit");
+async function getContributor(token, url, action_info) { const { Octokit } = require("octokit");
     const octokit = new Octokit({
         auth: token
     });
@@ -151,21 +131,21 @@ async function getLang(token, url, action_info) {
     return json_file
 }
 
-async function getResponsive(token, url, action_info) {
-    const { Octokit } = require("octokit");
-    const octokit = new Octokit({
-        auth: token
-    });
-    var url_trim = url.trim();
-    var url_len = url_trim.length;
-    var sliced_url = url.slice(19, url_len);
-    var repo_info = sliced_url.split("/",2);
-    const response = await octokit.request('GET /repos/{owner}/{repo}/{action}', {
-        owner: repo_info[0],
-        repo: repo_info[1],
-        action: action_info
-    });
-    return response.data.length
-}
+//async function getResponsive(token, url, action_info) {
+//    const { Octokit } = require("octokit");
+//    const octokit = new Octokit({
+//        auth: token
+//    });
+//    var url_trim = url.trim();
+//    var url_len = url_trim.length;
+//    var sliced_url = url.slice(19, url_len);
+//    var repo_info = sliced_url.split("/",2);
+//    const response = await octokit.request('GET /repos/{owner}/{repo}/{action}', {
+//        owner: repo_info[0],
+//        repo: repo_info[1],
+//        action: action_info
+//    });
+//    return response.data.length
+//}
 
-module.exports = { getScoreCard, getContributor, getLicense,  getReadme, getLang, getResponsive };
+module.exports = { getScoreCard, getContributor, getLicense,  getReadme, getLang };
