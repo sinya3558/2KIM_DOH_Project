@@ -1,0 +1,250 @@
+#!/usr/bin/env python3
+import os
+import sys
+import subprocess
+import javascript
+import json
+import ndjson
+import logging
+
+def getBusFactor(json_file):
+    f = open(json_file)
+    data = json.load(f)
+    contribution = []
+    contribution_percent = []
+    for i in range(len(data)):
+        contribution_each = int(data[i]['contributions'])
+        contribution.append(contribution_each)
+    for i in contribution:
+        contribution_percent.append(100 * float(i) / float(sum(contribution)))
+
+    if len(contribution) == 1:
+        bf_subscore = 0
+    elif len(contribution) == 2 and contribution[0] >= 70:
+        bf_subscore = 0.1
+    elif len(contribution) == 2 and contribution[0] < 70:
+        bf_subscore = 0.2
+    elif len(contribution) == 3 and contribution[0] >= 60:
+        bf_subscore = 0.2
+    elif len(contribution) == 3 and contribution[0] < 60:
+        bf_subscore = 0.3
+    elif len(contribution) > 3 and (contribution[0] + contribution[1]) > 80:
+        bf_subscore = 0.1
+    elif len(contribution) > 3 and (contribution[0] + contribution[1] + contribution[2]) < 60:
+        bf_subscore = 0.5
+    elif len(contribution) > 3 and (contribution[0] + contribution[1] + contribution[2]) < 50:
+        bf_subscore = 0.6
+    elif len(contribution) > 5 and (contribution[0] + contribution[1] + contribution[2] + contribution[3]) < 65:
+        bf_subscore = 0.8
+    else:
+        bf_subscore = 0.4
+    return bf_subscore
+
+def percentage(dict):
+    value_sum = sum(dict.values())
+    for lang_, lang_size in dict.items():
+        dict[lang_] = 100 * float(lang_size) / float(value_sum)
+    return dict
+
+def getChecks(json_file, tests):
+    each_score = []
+    f = open(json_file)
+    data = json.load(f)
+    data_checks = data['checks']
+    for test in tests:
+        index = find(data_checks, "name", test)
+        if index == -1:
+            getScore = 0
+            each_score.append(getScore)
+        else:
+            if ("score" in data_checks[index]):
+                getScore = data_checks[index]["score"]
+                each_score.append(getScore)
+            else:
+                each_score.append(0)
+    sub_score = sum(each_score) / len(tests)
+    sub_score_div = sub_score / 10
+    return sub_score_div
+
+def find(lst, key, value):
+    for i, dic in enumerate(lst):
+        if dic[key] == value:
+            return i
+    return -1
+
+def getJsonData(json_file, action):
+    f = open(json_file)
+    data = json.load(f)
+    if action != 'None':
+        get_data = data[action]
+    else:
+        get_data = data
+
+    return get_data
+
+def convertReadme(readme_size):
+    if (readme_size < 1000):
+        readme_subscore = 0.1
+    elif ((readme_size >= 1000) and (readme_size <= 3000)):
+        readme_subscore = 0.2
+    elif ((readme_size >= 3000) and (readme_size < 7000)):
+        readme_subscore = 0.4
+    elif ((readme_size >= 7000) and (readme_size < 10000)):
+        readme_subscore = 0.7
+    else:
+        readme_subscore = 1.0
+    return readme_subscore
+
+if __name__ == "__main__":
+    token_file = open("../../token.txt", 'r')
+    token = token_file.readline()
+    #token_gql = 'Bearer ' + token
+    #print(token_gql)
+    action = sys.argv[1]
+    if (action == 'install'):
+        subprocess.run(["npm init -y"], shell = True)
+        subprocess.run(["npm install -g typeScript"], shell = True)
+        subprocess.run(["npm install commander"], shell = True)
+        subprocess.run(["npm install node-fetch"], shell = True)
+        subprocess.run(["npm install --save-dev @types/node-fetch@2.x"], shell = True)
+        subprocess.run(["npm install axios"], shell = True)
+        subprocess.run(["npm i --save-dev @types/node"], shell = True)
+        #subprocess.run(["npm install --save-dev @octokit/graphql-schema @graphql-codegen/cli"], shell = True)
+        #npm install @octokit/auth-app
+        #npm install @octokit/graphql
+        subprocess.run(["pip install javascript"], shell = True)
+        subprocess.run(["pip install pytest-cov"], shell = True)
+        #subprocess.run(["npm install -g json-to-ndjson"], shell = True)
+
+    elif(action == 'build'):
+        subprocess.run(["npm run build"], shell = True)
+
+    elif(action == 'test'):
+        #subprocess.run(["py.test run --cov=sample.py"], shell = True)
+        total = 0
+        passed = 0
+        coverage = 0
+        print('Total: ', total, file = sys.stdout)
+        print('Passed: ', passed, file = sys.stdout)
+        print('Coverage: ', coverage, file = sys.stdout)
+
+    #in case of URL
+    else:
+        url_file_name = sys.argv[1]
+        from javascript import require
+        url_file = open(url_file_name, 'r')
+        trust_dict = {}
+        json_format_list = []
+        while True:
+            url = url_file.readline().replace("\n", "")
+
+            if not url:
+                break
+
+            js_file = require("./api.js")
+
+            action_info = ['issues', 'languages', 'readme', "contributors"]
+
+            #==================================================================
+            # calculate the bus factor (contributors)
+            contri_json = js_file.getContributor(token, url, action_info[3])
+            if (contri_json != '404'):
+                bf_subscore_raw = getBusFactor(contri_json)
+            else:
+                bf_subscore_raw = 0
+            bf_subscore = round(bf_subscore_raw, 2)
+            #==================================================================
+
+            #==================================================================
+            # calculate the license score
+            li_subscore = js_file.getLicense(token, url, action_info[0])
+            #print(li_subscore)
+            #==================================================================
+
+            #==================================================================
+            # calculate the correctness score (using three tests)
+            # generate the json file for scorecard
+            json_file = js_file.getScoreCard(url)
+            tests = ["Vulnerabilities", "CII-Best-Practices", "CI-Test"]
+            if (json_file != '404'):
+                cor_subscore_raw = getChecks(json_file, tests)
+            else:
+                cor_subscore_raw = 0
+            cor_subscore = round(cor_subscore_raw, 2)
+            cor_subscore = 0.4
+            #==================================================================
+
+            #==================================================================
+            # calculate the ramp up time (readme and language)
+            # 1) getReadme: make a json file that contains README data
+            # 2) getLang: get used programming languages in the repository
+            # 3) common_language: a dictionary of most used programming language in 2022
+
+            readme_json = js_file.getReadme(token, url, action_info[2])
+            if (readme_json != '404'):
+                readme_size = getJsonData(readme_json, 'size')
+            else:
+                readme_size = 0
+
+            readme_subscore = convertReadme(readme_size)
+
+            lang_json = js_file.getLang(token, url, action_info[1])
+            if (lang_json != '404'):
+                lang_type = getJsonData(lang_json, 'None')
+            else:
+                lang_type = 0
+
+            common_language = {"JavaScript": 1.0, "HTML": 0.9, "CSS": 0.9,
+                               "SQL": 0.8, "Python": 0.8, "Typescript": 0.75,
+                               "Java": 0.75, "Bash": 0.7, "Shell": 0.65, "C#": 0.6,
+                               "C++": 0.55, "PHP": 0.5, "C": 0.4, "PowerShell": 0.3, "Go": 0.25, "Rust": 0.15}
+            lang_subscore = 0
+
+            lang_type_percent = percentage(lang_type)
+            for lang_, lang_size in lang_type_percent.items():
+                if lang_ in common_language:
+                    lang_subscore += common_language[lang_] * (lang_size / 100)
+
+            ramp_subscore_raw = (lang_subscore + readme_subscore) / 2
+            ramp_subscore = round(ramp_subscore_raw, 2)
+            #==================================================================
+
+            #==================================================================
+            # calculate the responsiveness
+            resp_subscore = getChecks(json_file, ["Maintained"])
+
+            li_subscore = 0.5
+            net_score = (bf_subscore * 0.40) + (li_subscore * 0.15) + (cor_subscore * 0.15) + (ramp_subscore * 0.15) + (resp_subscore * 0.15)
+
+            trust_dict[url] = net_score
+            #==================================================================
+            final_dict = {"URL": url, "NET_SCORE": round(net_score, 2), "RAMP_UP_SCORE": ramp_subscore,
+                            "CORRECTNESS_SCORE": cor_subscore, "BUS_FACTOR_SCORE": bf_subscore,
+                            "RESPONSIVE_MAINTAINER_SCORE": resp_subscore, "LICENSE_SCORE": li_subscore}
+            print(final_dict)
+
+        #==================================================================
+        # write in NDJSON file (metrics.ndjson)
+        metrics_ndjson = [{"metric": "RAMP_UP_SCORE", "api":"rest", "filepath": "./api.ts", "line": "line 35"},
+                          {"metric": "CORRECTNESS_SCORE", "api": "rest", "filepath": "./api.ts", "line": "line 35"},
+                          {"metric": "BUS_FACTOR_SCORE", "api": "rest", "filepath": "./api.ts", "line": "line 35"},
+                          {"metric": "RESPONSIVE_MAINTAINER_SCORE", "api": "rest", "filepath": "./api.ts", "line": "line 35"},
+                          {"metric": "LICENSE_SCORE", "api": "graphql", "filepath": "./api.ts", "line": "line 35"}]
+        json_object = json.dumps(metrics_ndjson, indent=4)
+        with open("metrics.json", "w") as outfile:
+            outfile.write(json_object)
+        json_output = json.loads(json_object)
+        output = ndjson.dumps(json_output)
+        with open("metrics.ndjson", "w") as f:
+            writer = ndjson.writer(f, ensure_ascii = False)
+            writer.writerow(output)
+        #==================================================================
+
+        #print(trust_dict)
+        sortedTrust_dict = dict(sorted(trust_dict.items(), key=lambda item: item[1], reverse=True))
+        Trustworthy_list = sortedTrust_dict.keys()
+        print(Trustworthy_list, file=sys.stdout)
+
+        #logging.basicConfig(filename= "",
+        #                    format='%(),
+        #                    filemode='w')
