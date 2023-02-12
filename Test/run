@@ -4,6 +4,40 @@ import sys
 import subprocess
 import javascript
 import json
+import ndjson
+
+def getBusFactor(json_file):
+    f = open(json_file)
+    data = json.load(f)
+    contribution = []
+    contribution_percent = []
+    for i in range(len(data)):
+        contribution_each = int(data[i]['contributions'])
+        contribution.append(contribution_each)
+    for i in contribution:
+        contribution_percent.append(100 * float(i) / float(sum(contribution)))
+
+    if len(contribution) == 1:
+        bf_subscore = 0
+    elif len(contribution) == 2 and contribution[0] >= 70:
+        bf_subscore = 0.1
+    elif len(contribution) == 2 and contribution[0] < 70:
+        bf_subscore = 0.2
+    elif len(contribution) == 3 and contribution[0] >= 60:
+        bf_subscore = 0.2
+    elif len(contribution) == 3 and contribution[0] < 60:
+        bf_subscore = 0.3
+    elif len(contribution) > 3 and (contribution[0] + contribution[1]) > 80:
+        bf_subscore = 0.1
+    elif len(contribution) > 3 and (contribution[0] + contribution[1] + contribution[2]) < 60:
+        bf_subscore = 0.5
+    elif len(contribution) > 3 and (contribution[0] + contribution[1] + contribution[2]) < 50:
+        bf_subscore = 0.6
+    elif len(contribution) > 5 and (contribution[0] + contribution[1] + contribution[2] + contribution[3]) < 65:
+        bf_subscore = 0.8
+    else:
+        bf_subscore = 0.4
+    return bf_subscore
 
 def percentage(dict):
     value_sum = sum(dict.values())
@@ -37,8 +71,8 @@ def find(lst, key, value):
             return i
     return -1
 
-def getJsonData(readme_json, action):
-    f = open(readme_json)
+def getJsonData(json_file, action):
+    f = open(json_file)
     data = json.load(f)
     if action != 'None':
         get_data = data[action]
@@ -49,15 +83,15 @@ def getJsonData(readme_json, action):
 
 def convertReadme(readme_size):
     if (readme_size < 1000):
-        readme_subscore = 1
+        readme_subscore = 0.1
     elif ((readme_size >= 1000) and (readme_size <= 3000)):
-        readme_subscore = 2
+        readme_subscore = 0.2
     elif ((readme_size >= 3000) and (readme_size < 7000)):
-        readme_subscore = 4
+        readme_subscore = 0.4
     elif ((readme_size >= 7000) and (readme_size < 10000)):
-        readme_subscore = 7
+        readme_subscore = 0.7
     else:
-        readme_subscore = 10
+        readme_subscore = 1.0
     return readme_subscore
 
 if __name__ == "__main__":
@@ -78,12 +112,14 @@ if __name__ == "__main__":
         #npm install @octokit/auth-app
         #npm install @octokit/graphql
         subprocess.run(["pip install javascript"], shell = True)
+        subprocess.run(["pip install pytest-cov"], shell = True)
+        #subprocess.run(["npm install -g json-to-ndjson"], shell = True)
 
     elif(action == 'build'):
         subprocess.run(["npm run build"], shell = True)
 
     elif(action == 'test'):
-        print('testing')
+        subprocess.run(["py.test run --cov=sample.py"], shell = True)
 
     #in case of URL
     else:
@@ -91,7 +127,7 @@ if __name__ == "__main__":
         from javascript import require
         url_file = open(url_file_name, 'r')
         trust_dict = {}
-
+        json_format_list = []
         while True:
             url = url_file.readline()
 
@@ -102,14 +138,21 @@ if __name__ == "__main__":
 
             action_info = ['issues', 'languages', 'readme', "contributors"]
 
+            #==================================================================
             # calculate the bus factor (contributors)
-            bf_subscore = js_file.getBusFactor(token, url, action_info[3])
-            print("contributors", bf_subscore)
-            bf_subscore = 5
+            contri_json = js_file.getContributor(token, url, action_info[3])
+            if (contri_json != '404'):
+                bf_subscore = getBusFactor(contri_json)
+            else:
+                bf_subscore = 0
+            #==================================================================
 
+            #==================================================================
             # calculate the license score
             li_subscore = js_file.getLicense(token, url, action_info[0])
+            #==================================================================
 
+            #==================================================================
             # calculate the correctness score (using three tests)
             # generate the json file for scorecard
             json_file = js_file.getScoreCard(url)
@@ -118,6 +161,7 @@ if __name__ == "__main__":
                 cor_subscore = getCorrectness(json_file, testScore)
             else:
                 cor_subscore = 0
+            #==================================================================
 
             #==================================================================
             # calculate the ramp up time (readme and language)
@@ -139,10 +183,10 @@ if __name__ == "__main__":
             else:
                 lang_type = 0
 
-            common_language = {"JavaScript": 10, "HTML": 9, "CSS": 9,
-                               "SQL": 8, "Python": 8, "Typescript": 7.5,
-                               "Java": 7.5, "Bash": 7, "Shell": 6.5, "C#": 6,
-                               "C++": 5.5, "PHP": 5, "C": 4, "PowerShell": 3, "Go": 2.5, "Rust": 1.5}
+            common_language = {"JavaScript": 1.0, "HTML": 0.9, "CSS": 0.9,
+                               "SQL": 0.8, "Python": 0.8, "Typescript": 0.75,
+                               "Java": 0.75, "Bash": 0.7, "Shell": 0.65, "C#": 0.6,
+                               "C++": 0.55, "PHP": 0.5, "C": 0.4, "PowerShell": 0.3, "Go": 0.25, "Rust": 0.15}
             lang_subscore = 0
 
             lang_type_percent = percentage(lang_type)
@@ -151,19 +195,35 @@ if __name__ == "__main__":
                     lang_subscore += common_language[lang_] * (lang_size / 100)
 
             ramp_subscore = (lang_subscore + readme_subscore) / 2
-            print('ramp_subscore', ramp_subscore)
             #==================================================================
 
+            #==================================================================
             # calculate the responsiveness
             resp_subscore = js_file.getResponsive(token, url, action_info[0])
 
-
-            net_score = (bf_subscore * 0.40) + (5 * 0.15) + (cor_subscore * 0.15) + (ramp_subscore * 0.15) + (resp_subscore * 0.15)
+            li_subscore = 0.5
+            net_score = (bf_subscore * 0.40) + (li_subscore * 0.15) + (cor_subscore * 0.15) + (ramp_subscore * 0.15) + (resp_subscore * 0.15)
 
             trust_dict[url] = net_score
+            #==================================================================
+            final_dict = {"URL": url, "NET_SCORE": net_score, "RAMP_UP_SCORE": ramp_subscore,
+                            "CORRECTNESS_SCORE": cor_subscore, "BUS_FACTOR_SCORE": bf_subscore,
+                            "RESPONSIVE_MAINTAINER_SCORE": resp_subscore, "LICENSE_SCORE": li_subscore}
+            print(final_dict, file=sys.stdout)
 
-        print(trust_dict)
+        #==================================================================
+        # write in NDJSON file
+        json_object = json.dumps(json_format_list, indent=4)
+        with open("output.json", "w") as outfile:
+            outfile.write(json_object)
+        json_output = json.loads(json_object)
+        output = ndjson.dumps(json_output)
+        with open("output.ndjson", "w") as f:
+            writer = ndjson.writer(f, ensure_ascii = False)
+            writer.writerow(output)
+        #==================================================================
+
+        #print(trust_dict)
         sortedTrust_dict = dict(sorted(trust_dict.items(), key=lambda item: item[1], reverse=True))
         Trustworthy_list = sortedTrust_dict.keys()
-        print(Trustworthy_list)
-
+        print(Trustworthy_list, file=sys.stdout)

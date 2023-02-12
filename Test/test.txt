@@ -2,3 +2,4 @@ https://github.com/cloudinary/cloudinary_npm
 https://github.com/nullivex/nodist
 https://github.com/lodash/lodash
 https://github.com/CIRCLECI-GWP/insights-dashboard
+https://github.com/danieldoh/2KIM_DOH_Project

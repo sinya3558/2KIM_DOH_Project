@@ -121,9 +121,9 @@ function getLicense(token, url, action_info) {
 //        }
 //    `);
 //}
-function getBusFactor(token, url, action_info) {
+function getContributor(token, url, action_info) {
     return __awaiter(this, void 0, void 0, function () {
-        var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, response;
+        var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, json_file, contribute, jsonString, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -135,21 +135,34 @@ function getBusFactor(token, url, action_info) {
                     url_len = url_trim.length;
                     sliced_url = url.slice(19, url_len);
                     repo_info = sliced_url.split("/", 2);
+                    json_file = './contribute.json';
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
                     return [4 /*yield*/, octokit.request('GET /repos/{owner}/{repo}/{action}', {
                             owner: repo_info[0],
                             repo: repo_info[1],
                             action: action_info
                         })];
-                case 1:
-                    response = _a.sent();
-                    return [2 /*return*/, response.data.length];
+                case 2:
+                    contribute = _a.sent();
+                    jsonString = JSON.stringify(contribute.data, null, 2);
+                    fs.writeFileSync(json_file, jsonString, {
+                        flag: 'w'
+                    });
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_1 = _a.sent();
+                    json_file = "404";
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/, json_file];
             }
         });
     });
 }
 function getReadme(token, url, action_info) {
     return __awaiter(this, void 0, void 0, function () {
-        var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, json_file, readme, jsonString, error_1;
+        var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, json_file, readme, jsonString, error_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -178,7 +191,7 @@ function getReadme(token, url, action_info) {
                     });
                     return [3 /*break*/, 4];
                 case 3:
-                    error_1 = _a.sent();
+                    error_2 = _a.sent();
                     json_file = "404";
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/, json_file];
@@ -188,7 +201,7 @@ function getReadme(token, url, action_info) {
 }
 function getLang(token, url, action_info) {
     return __awaiter(this, void 0, void 0, function () {
-        var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, json_file, lang, jsonString, error_2;
+        var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, json_file, lang, jsonString, error_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -217,7 +230,7 @@ function getLang(token, url, action_info) {
                     });
                     return [3 /*break*/, 4];
                 case 3:
-                    error_2 = _a.sent();
+                    error_3 = _a.sent();
                     json_file = "404";
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/, json_file];
@@ -251,4 +264,4 @@ function getResponsive(token, url, action_info) {
         });
     });
 }
-module.exports = { getScoreCard: getScoreCard, getBusFactor: getBusFactor, getLicense: getLicense, getReadme: getReadme, getLang: getLang, getResponsive: getResponsive };
+module.exports = { getScoreCard: getScoreCard, getContributor: getContributor, getLicense: getLicense, getReadme: getReadme, getLang: getLang, getResponsive: getResponsive };

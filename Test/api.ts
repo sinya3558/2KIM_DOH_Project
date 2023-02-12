@@ -70,7 +70,8 @@ async function getLicense(token, url, action_info) {
 //        }
 //    `);
 //}
-async function getBusFactor(token, url, action_info) {
+
+async function getContributor(token, url, action_info) {
     const { Octokit } = require("octokit");
     const octokit = new Octokit({
         auth: token
@@ -79,12 +80,21 @@ async function getBusFactor(token, url, action_info) {
     var url_len = url_trim.length;
     var sliced_url = url.slice(19, url_len);
     var repo_info = sliced_url.split("/",2);
-    const response = await octokit.request('GET /repos/{owner}/{repo}/{action}', {
-        owner: repo_info[0],
-        repo: repo_info[1],
-        action: action_info
-    });
-    return response.data.length
+    var json_file = './contribute.json';
+    try {
+        const contribute = await octokit.request('GET /repos/{owner}/{repo}/{action}', {
+            owner: repo_info[0],
+            repo: repo_info[1],
+            action: action_info
+        });
+        const jsonString = JSON.stringify(contribute.data, null, 2)
+        fs.writeFileSync(json_file, jsonString, {
+            flag: 'w'
+        })
+    } catch(error) {
+        json_file = "404";
+    }
+    return json_file
 }
 
 
@@ -158,4 +168,4 @@ async function getResponsive(token, url, action_info) {
     return response.data.length
 }
 
-module.exports = { getScoreCard, getBusFactor, getLicense,  getReadme, getLang, getResponsive };
+module.exports = { getScoreCard, getContributor, getLicense,  getReadme, getLang, getResponsive };
