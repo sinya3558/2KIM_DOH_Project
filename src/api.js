@@ -72,7 +72,7 @@ function getScoreCard(url) {
 }
 function getLicense(token, url) {
     return __awaiter(this, void 0, void 0, function () {
-        var graphql, url_trim, url_len, sliced_url, repo_info, repository;
+        var graphql, url_trim, url_len, sliced_url, repo_info, json_file, repository, jsonString, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -81,24 +81,37 @@ function getLicense(token, url) {
                     url_len = url_trim.length;
                     sliced_url = url.slice(19, url_len);
                     repo_info = sliced_url.split("/", 2);
+                    json_file = './license.json';
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 3, , 4]);
                     return [4 /*yield*/, graphql({
-                            query: "query repository_details($owner: String!, $repo: String!) {\n            repository(owner:$owner, name:$repo) {\n                licenseInfo {\n                    name\n                }\n            }\n        }",
+                            query: "query repository_details($owner: String!, $repo: String!) {\n                repository(owner:$owner, name:$repo) {\n                    licenseInfo {\n                        name\n                    }\n                }\n            }",
                             owner: repo_info[0],
                             repo: repo_info[1],
                             headers: {
                                 'Authorization': 'bearer ' + token
                             }
                         })];
-                case 1:
+                case 2:
                     repository = (_a.sent()).repository;
-                    return [2 /*return*/, repository];
+                    jsonString = JSON.stringify(repository, null, 2);
+                    fs.writeFileSync(json_file, jsonString, {
+                        flag: 'w'
+                    });
+                    return [3 /*break*/, 4];
+                case 3:
+                    error_1 = _a.sent();
+                    json_file = "404";
+                    return [3 /*break*/, 4];
+                case 4: return [2 /*return*/, json_file];
             }
         });
     });
 }
 function getContributor(token, url, action_info) {
     return __awaiter(this, void 0, void 0, function () {
-        var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, json_file, contribute, jsonString, error_1;
+        var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, json_file, contribute, jsonString, error_2;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -127,7 +140,7 @@ function getContributor(token, url, action_info) {
                     });
                     return [3 /*break*/, 4];
                 case 3:
-                    error_1 = _a.sent();
+                    error_2 = _a.sent();
                     json_file = "404";
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/, json_file];
@@ -137,7 +150,7 @@ function getContributor(token, url, action_info) {
 }
 function getReadme(token, url, action_info) {
     return __awaiter(this, void 0, void 0, function () {
-        var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, json_file, readme, jsonString, error_2;
+        var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, json_file, readme, jsonString, error_3;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -166,7 +179,7 @@ function getReadme(token, url, action_info) {
                     });
                     return [3 /*break*/, 4];
                 case 3:
-                    error_2 = _a.sent();
+                    error_3 = _a.sent();
                     json_file = "404";
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/, json_file];
@@ -176,7 +189,7 @@ function getReadme(token, url, action_info) {
 }
 function getLang(token, url, action_info) {
     return __awaiter(this, void 0, void 0, function () {
-        var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, json_file, lang, jsonString, error_3;
+        var Octokit, octokit, url_trim, url_len, sliced_url, repo_info, json_file, lang, jsonString, error_4;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -205,7 +218,7 @@ function getLang(token, url, action_info) {
                     });
                     return [3 /*break*/, 4];
                 case 3:
-                    error_3 = _a.sent();
+                    error_4 = _a.sent();
                     json_file = "404";
                     return [3 /*break*/, 4];
                 case 4: return [2 /*return*/, json_file];
@@ -213,20 +226,20 @@ function getLang(token, url, action_info) {
         });
     });
 }
-//async function getResponsive(token, url, action_info) {
-//    const { Octokit } = require("octokit");
-//    const octokit = new Octokit({
-//        auth: token
-//    });
-//    var url_trim = url.trim();
-//    var url_len = url_trim.length;
-//    var sliced_url = url.slice(19, url_len);
-//    var repo_info = sliced_url.split("/",2);
-//    const response = await octokit.request('GET /repos/{owner}/{repo}/{action}', {
-//        owner: repo_info[0],
-//        repo: repo_info[1],
-//        action: action_info
-//    });
-//    return response.data.length
-//}
-module.exports = { getScoreCard: getScoreCard, getContributor: getContributor, getLicense: getLicense, getReadme: getReadme, getLang: getLang };
+function getGiturl(npmurl) {
+    return __awaiter(this, void 0, void 0, function () {
+        var searchPackages, data, url;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    searchPackages = require('query-registry').searchPackages;
+                    return [4 /*yield*/, searchPackages({ query: { text: npmurl } })];
+                case 1:
+                    data = _a.sent();
+                    url = data["objects"][0].package.links.repository;
+                    return [2 /*return*/, url];
+            }
+        });
+    });
+}
+module.exports = { getScoreCard: getScoreCard, getContributor: getContributor, getLicense: getLicense, getReadme: getReadme, getLang: getLang, getGiturl: getGiturl };

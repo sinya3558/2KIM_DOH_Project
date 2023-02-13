@@ -34,22 +34,30 @@ async function getLicense(token, url) {
     var url_len = url_trim.length;
     var sliced_url = url.slice(19, url_len);
     var repo_info = sliced_url.split("/",2);
-
-    const { repository } = await graphql ({
-        query: `query repository_details($owner: String!, $repo: String!) {
-            repository(owner:$owner, name:$repo) {
-                licenseInfo {
-                    name
+    var json_file = './license.json';
+    try {
+        const { repository } = await graphql ({
+            query: `query repository_details($owner: String!, $repo: String!) {
+                repository(owner:$owner, name:$repo) {
+                    licenseInfo {
+                        name
+                    }
                 }
-            }
-        }`,
-        owner: repo_info[0],
-        repo: repo_info[1],
-        headers: {
-            'Authorization': 'bearer ' + token,
-        },
-    });
-    return repository
+            }`,
+            owner: repo_info[0],
+            repo: repo_info[1],
+            headers: {
+                'Authorization': 'bearer ' + token,
+            },
+        });
+        const jsonString = JSON.stringify(repository, null, 2)
+        fs.writeFileSync(json_file, jsonString, {
+            flag: 'w'
+        })
+    } catch(error) {
+        json_file = "404";
+    }
+    return json_file
 }
 
 async function getContributor(token, url, action_info) { const { Octokit } = require("octokit");
@@ -131,21 +139,13 @@ async function getLang(token, url, action_info) {
     return json_file
 }
 
-//async function getResponsive(token, url, action_info) {
-//    const { Octokit } = require("octokit");
-//    const octokit = new Octokit({
-//        auth: token
-//    });
-//    var url_trim = url.trim();
-//    var url_len = url_trim.length;
-//    var sliced_url = url.slice(19, url_len);
-//    var repo_info = sliced_url.split("/",2);
-//    const response = await octokit.request('GET /repos/{owner}/{repo}/{action}', {
-//        owner: repo_info[0],
-//        repo: repo_info[1],
-//        action: action_info
-//    });
-//    return response.data.length
-//}
 
-module.exports = { getScoreCard, getContributor, getLicense,  getReadme, getLang };
+async function getGiturl(npmurl: string) {
+    const { searchPackages } = require('query-registry')
+    const data = await searchPackages({query: {text: npmurl}});
+    const url = data["objects"][0].package.links.repository;
+    return url;
+}
+
+
+module.exports = { getScoreCard, getContributor, getLicense,  getReadme, getLang, getGiturl };

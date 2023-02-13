@@ -8,7 +8,8 @@
     "commander": "^10.0.0",
     "github-repository-provider": "^7.33.44",
     "node-fetch": "^3.3.0",
-    "octokit": "^2.0.14"
+    "octokit": "^2.0.14",
+    "query-registry": "^2.6.0"
   },
   "devDependencies": {
     "@types/node": "^18.13.0",
