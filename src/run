@@ -350,8 +350,8 @@ def main(token, action, log_level):
 
 if __name__ == "__main__":
     action = sys.argv[1]
-    if (action == 'install'):
-        subprocess.run(['pip3 install python-dotenv'], shell=True)
+    if(action == 'install'):
+        main(0, action, 0)
     from dotenv import load_dotenv
     load_dotenv()
     token = os.getenv("GITHUB_TOKEN")
@@ -371,5 +371,6 @@ if __name__ == "__main__":
     logger.addHandler(file_handler)
     action = sys.argv[1]
 
-    main(token, action, log_level)
+    if (action != 'install'):
+        main(token, action, log_level)
 
