@@ -15,7 +15,7 @@
   "scripts": {
     "install-save": "npm i axios query-registry nyc octokit --save",
     "install-dev": "npm i typescript @types/node --save-dev",
-    "install": "npm run -s install-save && npm run -s install-dev && pip3 install pandas javascript ndjson coverage python-dotenv",
+    "install": "npm run -s install-save && npm run -s install-dev && pip3 install pandas javascript ndjson coverage",
     "build": "npx tsc",
     "clear": "rm -rf ./node_modules ./package-lock.json ./contribute.json ./language.json ./license.json ./metrics.json ./readme.json ./Scorecard.json"
   },
