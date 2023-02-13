@@ -1,3 +1,4 @@
+https://github.com/davisjam/vuln-regex-detector
 https://github.com/acikkaynak/deprem-yardim-backend-go
 https://github.com/cloudflare/wildebeest
 https://github.com/pedroslopez/whatsapp-web.js
@@ -5,7 +6,7 @@ https://github.com/acheong08/EdgeGPT
 https://github.com/acikkaynak/deprem-io-backend
 https://github.com/eugeneyan/applied-ml
 https://github.com/lensterxyz/lenster
-https://github.com/twbs/bootstrap
+https://gitlab.com/inkscape/inkscape
 https://github.com/lensterxyz/lenster
 https://github.com/commaai/openpilot
 https://github.com/calcom/cal.com

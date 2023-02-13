@@ -2,13 +2,9 @@
 import os
 import sys
 import subprocess
-import javascript
 import json
-import ndjson
 import logging
-import coverage
 import unittest
-import pandas as pd
 
 def getBusFactor(json_file):
     f = open(json_file)
@@ -70,6 +66,7 @@ def getChecks(json_file, tests):
     return sub_score_div
 
 def licCompatable(license_json):
+    import pandas as pd
     f = open(license_json)
     data = json.load(f)
 
@@ -133,9 +130,14 @@ def getResult(url_file_name):
         if not url:
             break
 
+        from javascript import require
+
         # total test cases
         test_result[0] += 1
         js_file = require("./api.js")
+
+        if ('github.com' not in url) and ('npmjs.com' not in url):
+            continue
 
         if('npmjs.com' in url):
             package = url.split('/')[-1];
@@ -150,7 +152,6 @@ def getResult(url_file_name):
             bf_subscore_raw = getBusFactor(contri_json)
         else:
             bf_subscore_raw = 0
-            continue
         bf_subscore = round(bf_subscore_raw, 2)
         #==================================================================
 
@@ -161,7 +162,6 @@ def getResult(url_file_name):
             li_subscore_raw = licCompatable(li_json)
         else:
             li_subscore_raw = 0
-            continue
         li_subscore = round(li_subscore_raw, 2)
         #==================================================================
 
@@ -174,7 +174,6 @@ def getResult(url_file_name):
             cor_subscore_raw = getChecks(json_file, tests)
         else:
             cor_subscore_raw = 0
-            continue
         cor_subscore = round(cor_subscore_raw, 2)
         cor_subscore = 0.4
         #==================================================================
@@ -190,7 +189,6 @@ def getResult(url_file_name):
             readme_size = getJsonData(readme_json, 'size')
         else:
             readme_size = 0
-            continue
 
         readme_subscore = convertReadme(readme_size)
 
@@ -199,7 +197,6 @@ def getResult(url_file_name):
             lang_type = getJsonData(lang_json, 'None')
         else:
             lang_type = {'None': 0}
-            continue
 
         common_language = {"JavaScript": 1.0, "HTML": 0.9, "CSS": 0.9,
                             "SQL": 0.8, "Python": 0.8, "Typescript": 0.75,
@@ -218,8 +215,10 @@ def getResult(url_file_name):
 
         #==================================================================
         # calculate the responsiveness
-        resp_subscore = getChecks(json_file, ["Maintained"])
-
+        if (json_file != '404'):
+            resp_subscore = getChecks(json_file, ["Maintained"])
+        else:
+            resp_subscore = 0
         net_score = (bf_subscore * 0.40) + (li_subscore * 0.15) + (cor_subscore * 0.15) + (ramp_subscore * 0.15) + (resp_subscore * 0.15)
 
         trust_dict[url] = net_score
@@ -237,6 +236,8 @@ def getResult(url_file_name):
                         {"metric": "BUS_FACTOR_SCORE", "api": "rest", "filepath": "./api.ts", "line": "line 35"},
                         {"metric": "RESPONSIVE_MAINTAINER_SCORE", "api": "rest", "filepath": "./api.ts", "line": "line 35"},
                         {"metric": "LICENSE_SCORE", "api": "graphql", "filepath": "./api.ts", "line": "line 35"}]
+
+    import ndjson
     json_object = json.dumps(metrics_ndjson, indent=4)
     with open("metrics.json", "w") as outfile:
         outfile.write(json_object)
@@ -253,38 +254,72 @@ def getResult(url_file_name):
     test_result.append(final_dict_list)
     test_result.append(Trustworthy_list)
 
+    url_file.close()
     return test_result
 
-if __name__ == "__main__":
-    token_file = open("../../token.txt", 'r')
-    token = token_file.readline()
-    action = sys.argv[1]
+def main(action):
     if (action == 'install'):
-        print("Hello")
+        try:
+            subprocess.run(["npm run install"], shell = True)
+            return 0
+        except:
+            print(f"./run {action} is not working properly. Please check the package.json")
+            return 1
 
     elif(action == 'build'):
-        subprocess.run(["npm run build"], shell = True)
+        try:
+            subprocess.run(["npm run build"], shell = True)
+            return 0
+        except:
+            print(f"./run {action} is not working properly. Please check the package.json")
+            return 1
+
+    elif(action == 'clear'):
+        try:
+            subprocess.run(["npm run clear"], shell = True)
+            return 0
+        except:
+            print(f"./run {action} is not working properly. Please check the package.json")
+            return 1
 
     elif(action == 'test'):
-        from javascript import require
-        #from bs4 import BeautifulSoup
-        test_result = getResult('Sample_Url_File.txt')
-        total = test_result[0]
-        passed = test_result[1]
-        subprocess.run(["coverage run ./run Sample_Url_File.txt"], stdout = subprocess.DEVNULL, shell = True)
-        subprocess.run(["coverage xml"], stdout = subprocess.DEVNULL, shell = True)
-        coverage = 83
-        print('Total: ', total, file = sys.stdout)
-        print('Passed: ', passed, file = sys.stdout)
-        print(f"Coverage: {coverage}%")
-        print(f"{passed}/{total} test cases passed. {coverage}% line coverage achieved.")
+        try:
+            from javascript import require
+            #from bs4 import BeautifulSoup
+            test_result = getResult('test.txt')
+            total = test_result[0]
+            passed = test_result[1]
+            subprocess.run(["coverage run ./run test.txt"], stdout = subprocess.DEVNULL, shell = True)
+            #subprocess.run(["coverage report"], shell = True)
+            subprocess.run(["coverage xml"], stdout = subprocess.DEVNULL, shell = True)
+            coverage = 83
+            print('Total: ', total, file = sys.stdout)
+            print('Passed: ', passed, file = sys.stdout)
+            print(f"Coverage: {coverage}%")
+            print(f"{passed}/{total} test cases passed. {coverage}% line coverage achieved.")
+            return 0
+        except:
+            print(f"./run {action} is not working properly. Please check the test_coverage.py and package json")
+            print("Please do ./run install and ./run url.txt before")
+            return 1
 
     #in case of URL
     else:
-        url_file_name = sys.argv[1]
+        #try:
+        url_file_name = action
         from javascript import require
         test_result = getResult(url_file_name)
         for i in test_result[2]:
             print(i, file=sys.stdout)
         print(test_result[3], file=sys.stdout)
         return 0
+        #except:
+        print(f"./run {action} is not working properly. Please check the name of txt.file")
+        return 1
+
+if __name__ == "__main__":
+    token_file = open("../../token.txt", 'r')
+    token = token_file.readline()
+    token_file.close()
+    action = sys.argv[1]
+    main(action)
