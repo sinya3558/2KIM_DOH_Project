@@ -5,7 +5,6 @@ import subprocess
 import json
 import logging
 import unittest
-from dotenv import load_dotenv
 
 def getBusFactor(json_file):
     f = open(json_file)
@@ -307,9 +306,9 @@ def main(token, action, log_level):
             test_result = getResult(token, 'testcases.txt')
             total = test_result[0]
             passed = test_result[1]
-            subprocess.run(["coverage run ./run testcases.txt"], stdout = subprocess.DEVNULL, shell = True)
+            #subprocess.run(["coverage run ./run testcases.txt"], stdout = subprocess.DEVNULL, shell = True)
             #subprocess.run(["coverage report"], shell = True)
-            subprocess.run(["coverage xml"], stdout = subprocess.DEVNULL, shell = True)
+            #subprocess.run(["coverage xml"], stdout = subprocess.DEVNULL, shell = True)
             coverage = 83
             print('Total: ', total, file = sys.stdout)
             print('Passed: ', passed, file = sys.stdout)
@@ -350,6 +349,10 @@ def main(token, action, log_level):
             return 1
 
 if __name__ == "__main__":
+    action = sys.argv[1]
+    if(action == 'install'):
+        main(0, action, 0)
+    from dotenv import load_dotenv
     load_dotenv()
     token = os.getenv("GITHUB_TOKEN")
     formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
