@@ -22,13 +22,13 @@ async function getScoreCard(url: string) {
                 flag: 'w'
             })
         })
-        .catch(function (error: any) {
+        .catch(function (_error: any) {
             jsonfile_name = '404';
         });
     return jsonfile_name
 }
 
-async function getLicense(token, url) {
+async function getLicense(token: any, url: any) {
     const { graphql } = require("@octokit/graphql");
     var url_trim = url.trim();
     var url_len = url_trim.length;
@@ -60,7 +60,7 @@ async function getLicense(token, url) {
     return json_file
 }
 
-async function getContributor(token, url, action_info) { const { Octokit } = require("octokit");
+async function getContributor(token: any, url: any, action_info: any) { const { Octokit } = require("octokit");
     const octokit = new Octokit({
         auth: token
     });
@@ -86,7 +86,7 @@ async function getContributor(token, url, action_info) { const { Octokit } = req
 }
 
 
-async function getReadme(token, url, action_info) {
+async function getReadme(token: any, url:any, action_info: any) {
     const { Octokit } = require("octokit");
     const octokit = new Octokit({
         auth: token
@@ -112,7 +112,7 @@ async function getReadme(token, url, action_info) {
     return json_file
 }
 
-async function getLang(token, url, action_info) {
+async function getLang(token: any, url: any, action_info: any) {
     const { Octokit } = require("octokit");
     const octokit = new Octokit({
         auth: token

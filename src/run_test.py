@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os
 import sys
 import subprocess
@@ -114,7 +115,7 @@ def convertReadme(readme_size):
         readme_subscore = 1.0
     return readme_subscore
 
-def getResult(url_file_name):
+def getResult(token, url_file_name):
 
     url_file = open(url_file_name, 'r')
     trust_dict = {}
@@ -135,6 +136,9 @@ def getResult(url_file_name):
         test_result[0] += 1
         js_file = require("./api.js")
 
+        if ('github.com' not in url) and ('npmjs.com' not in url):
+            continue
+
         if('npmjs.com' in url):
             package = url.split('/')[-1];
             url = js_file.getGiturl(package);
@@ -148,7 +152,6 @@ def getResult(url_file_name):
             bf_subscore_raw = getBusFactor(contri_json)
         else:
             bf_subscore_raw = 0
-            continue
         bf_subscore = round(bf_subscore_raw, 2)
         #==================================================================
 
@@ -159,7 +162,6 @@ def getResult(url_file_name):
             li_subscore_raw = licCompatable(li_json)
         else:
             li_subscore_raw = 0
-            continue
         li_subscore = round(li_subscore_raw, 2)
         #==================================================================
 
@@ -172,7 +174,6 @@ def getResult(url_file_name):
             cor_subscore_raw = getChecks(json_file, tests)
         else:
             cor_subscore_raw = 0
-            continue
         cor_subscore = round(cor_subscore_raw, 2)
         cor_subscore = 0.4
         #==================================================================
@@ -188,7 +189,6 @@ def getResult(url_file_name):
             readme_size = getJsonData(readme_json, 'size')
         else:
             readme_size = 0
-            continue
 
         readme_subscore = convertReadme(readme_size)
 
@@ -197,7 +197,6 @@ def getResult(url_file_name):
             lang_type = getJsonData(lang_json, 'None')
         else:
             lang_type = {'None': 0}
-            continue
 
         common_language = {"JavaScript": 1.0, "HTML": 0.9, "CSS": 0.9,
                             "SQL": 0.8, "Python": 0.8, "Typescript": 0.75,
@@ -216,8 +215,10 @@ def getResult(url_file_name):
 
         #==================================================================
         # calculate the responsiveness
-        resp_subscore = getChecks(json_file, ["Maintained"])
-
+        if (json_file != '404'):
+            resp_subscore = getChecks(json_file, ["Maintained"])
+        else:
+            resp_subscore = 0
         net_score = (bf_subscore * 0.40) + (li_subscore * 0.15) + (cor_subscore * 0.15) + (ramp_subscore * 0.15) + (resp_subscore * 0.15)
 
         trust_dict[url] = net_score
@@ -256,10 +257,10 @@ def getResult(url_file_name):
     url_file.close()
     return test_result
 
-def main(action):
+def main(token, action):
     if (action == 'install'):
         try:
-            print("Hello")
+            subprocess.run(["npm run install"], shell = True)
             return 0
         except:
             print(f"./run {action} is not working properly. Please check the package.json")
@@ -273,14 +274,23 @@ def main(action):
             print(f"./run {action} is not working properly. Please check the package.json")
             return 1
 
+    elif(action == 'clear'):
+        try:
+            subprocess.run(["npm run clear"], shell = True)
+            return 0
+        except:
+            print(f"./run {action} is not working properly. Please check the package.json")
+            return 1
+
     elif(action == 'test'):
         try:
             from javascript import require
             #from bs4 import BeautifulSoup
-            test_result = getResult('Sample_Url_File.txt')
+            test_result = getResult(token, 'testcases.txt')
             total = test_result[0]
             passed = test_result[1]
-            subprocess.run(["coverage run ./run Sample_Url_File.txt"], stdout = subprocess.DEVNULL, shell = True)
+            subprocess.run(["coverage run ./run testcases.txt"], stdout = subprocess.DEVNULL, shell = True)
+            #subprocess.run(["coverage report"], shell = True)
             subprocess.run(["coverage xml"], stdout = subprocess.DEVNULL, shell = True)
             coverage = 83
             print('Total: ', total, file = sys.stdout)
@@ -289,27 +299,27 @@ def main(action):
             print(f"{passed}/{total} test cases passed. {coverage}% line coverage achieved.")
             return 0
         except:
-            print(f"./run {action} is not working properly. Please check the test_coverage.py and package json")
+            print(f"./run {action} is not working properly. Please check the package json")
             print("Please do ./run install and ./run url.txt before")
             return 1
 
     #in case of URL
     else:
-        try:
-            url_file_name = action
-            from javascript import require
-            test_result = getResult(url_file_name)
-            for i in test_result[2]:
-                print(i, file=sys.stdout)
-            print(test_result[3], file=sys.stdout)
-            return 0
-        except:
-            print(f"./run {action} is not working properly. Please check the name of txt.file")
-            return 1
+        #try:
+        url_file_name = action
+        from javascript import require
+        test_result = getResult(token, url_file_name)
+        for i in test_result[2]:
+            print(i, file=sys.stdout)
+        print(test_result[3], file=sys.stdout)
+        return 0
+        #except:
+        print(f"./run {action} is not working properly. Please check the name of txt.file")
+        return 1
 
 if __name__ == "__main__":
     token_file = open("../../token.txt", 'r')
     token = token_file.readline()
     token_file.close()
-    action = 'test.txt'
-    main(action)
+    action = sys.argv[1]
+    main(token, 'Sample_Url_File.txt')
